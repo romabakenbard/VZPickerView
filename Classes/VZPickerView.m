@@ -8,7 +8,11 @@
 
 #import "VZPickerView.h"
 
-@interface VZPickerView () <UIPickerViewDelegate, UIPickerViewDataSource>
+float const VZPickerViewContentHeight = 300;
+
+static UIView *_ipadHolderView = nil;
+
+@interface VZPickerView () <UIPickerViewDelegate, UIPickerViewDataSource, UIPopoverControllerDelegate>
 @property (nonatomic, weak) UIView *presentingView;
 @property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, strong) UIView *dimView;
@@ -19,6 +23,7 @@
 @property (nonatomic) CGFloat rowHeight;
 @property (nonatomic, copy) VZPickerViewDateResultBlock dateCompleteBlock;
 @property (nonatomic, copy) VZPickerViewObjectResultBlock objectCompleteBlock;
+@property (nonatomic, strong) UIPopoverController *popover;
 @end
 
 @implementation VZPickerView
@@ -66,11 +71,16 @@
 - (id)initWithView:(UIView *)view
 {
     CGRect frame = view.bounds;
+    if ([self isIpad]) {
+        frame = CGRectMake(0, 0, 320, VZPickerViewContentHeight);
+    }
     self = [super initWithFrame:frame];
     if (self) {
         // Initialization code
         self.presentingView = view;
-        [self.presentingView addSubview:self];
+        if (![self isIpad]) {
+            [self.presentingView addSubview:self];
+        }
     }
     return self;
 }
@@ -102,9 +112,12 @@
 
 - (void)setupContentView {
     if (!_contentView) {
-        _contentView = [[UIView alloc]initWithFrame:CGRectMake(0, self.frame.size.height, self.frame.size.width, 300)];
+        float offsetY = ([self isIpad]) ? 0 : self.frame.size.height;
+        _contentView = [[UIView alloc]initWithFrame:CGRectMake(0, offsetY, self.frame.size.width, VZPickerViewContentHeight)];
         _contentView.backgroundColor = [UIColor whiteColor];
-        [self addSubview:_contentView];
+        if (![self isIpad]) {
+            [self addSubview:_contentView];
+        }
     }
 }
 
@@ -163,37 +176,61 @@
 }
 
 - (void)show {
-    
-    //hide keyboard
-    [[UIApplication sharedApplication].keyWindow endEditing:YES];
-    
-    [UIView animateWithDuration:0.3 animations:^{
-        _dimView.alpha = 1.0;
-        _contentView.frame = ({
-            CGRect frame = _contentView.frame;
-            frame.origin.y = self.frame.size.height - frame.size.height;
-            frame;
-        });
-    }];
+
+    if ([self isIpad]) {
+        UIViewController *controller = [[UIViewController alloc] init];
+        controller.preferredContentSize = CGSizeMake(320, self.contentView.frame.size.height);
+        controller.view.frame = self.contentView.bounds;
+        [controller.view addSubview:self.contentView];
+        self.popover = [[UIPopoverController alloc] initWithContentViewController:controller];
+        self.popover.delegate = self;
+        [self.popover presentPopoverFromRect:self.presentingView.frame inView:self.presentingView.superview permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+
+        _ipadHolderView = self;
+        
+    } else {
+        //hide keyboard
+        [[UIApplication sharedApplication].keyWindow endEditing:YES];
+        
+        [UIView animateWithDuration:0.3 animations:^{
+            _dimView.alpha = 1.0;
+            _contentView.frame = ({
+                CGRect frame = _contentView.frame;
+                frame.origin.y = self.frame.size.height - frame.size.height;
+                frame;
+            });
+        }];
+    }
 }
 
 - (void)hide {
-    [UIView animateWithDuration:0.3 animations:^{
-        _dimView.alpha = 0.0;
-        _contentView.frame = ({
-            CGRect frame = _contentView.frame;
-            frame.origin.y = self.frame.size.height;
-            frame;
+    
+    if ([self isIpad]) {
+//        i realy hate popover whitout dispatch_after does not dismissed
+        self.popover.passthroughViews = nil;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            _ipadHolderView = nil;
+            [self.popover dismissPopoverAnimated:YES];
+            self.popover = nil;
         });
-    } completion:^(BOOL finished) {
-        [self removeFromSuperview];
-        self.contentView = nil;
-        self.dateCompleteBlock = nil;
-        self.presentingView = nil;
-        self.customPicker = nil;
-        self.objectCompleteBlock = nil;
-        self.dimView = nil;
-    }];
+    } else {
+        [UIView animateWithDuration:0.3 animations:^{
+            _dimView.alpha = 0.0;
+            _contentView.frame = ({
+                CGRect frame = _contentView.frame;
+                frame.origin.y = self.frame.size.height;
+                frame;
+            });
+        } completion:^(BOOL finished) {
+            [self removeFromSuperview];
+            self.contentView = nil;
+            self.dateCompleteBlock = nil;
+            self.presentingView = nil;
+            self.customPicker = nil;
+            self.objectCompleteBlock = nil;
+            self.dimView = nil;
+        }];
+    }
 }
 
 
@@ -243,5 +280,17 @@
         return result;
     }
     return [super respondsToSelector:aSelector];
+}
+
+#pragma mark - Helper -
+
+- (BOOL)isIpad {
+    return UIUserInterfaceIdiomPad == UI_USER_INTERFACE_IDIOM();
+}
+
+#pragma mark - UIPopoverDelegate -
+
+- (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController {
+    _popover = nil;
 }
 @end

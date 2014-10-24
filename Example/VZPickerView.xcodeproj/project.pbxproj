@@ -396,6 +396,7 @@
 				GCC_PREFIX_HEADER = "VZPickerView/VZPickerView-Prefix.pch";
 				INFOPLIST_FILE = "VZPickerView/VZPickerView-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -409,6 +410,7 @@
 				GCC_PREFIX_HEADER = "VZPickerView/VZPickerView-Prefix.pch";
 				INFOPLIST_FILE = "VZPickerView/VZPickerView-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
