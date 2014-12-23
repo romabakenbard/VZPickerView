@@ -184,7 +184,7 @@ static UIView *_ipadHolderView = nil;
         [controller.view addSubview:self.contentView];
         self.popover = [[UIPopoverController alloc] initWithContentViewController:controller];
         self.popover.delegate = self;
-        [self.popover presentPopoverFromRect:self.presentingView.frame inView:self.presentingView.superview permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+        [self.popover presentPopoverFromRect:self.presentingView.frame inView:self.presentingView.superview permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
 
         _ipadHolderView = self;
         
