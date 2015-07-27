@@ -210,7 +210,7 @@ static UIView *_ipadHolderView = nil;
         self.popover.passthroughViews = nil;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             _ipadHolderView = nil;
-            [self.popover dismissPopoverAnimated:YES];
+            [self.popover dismissPopoverAnimated:NO];
             self.popover = nil;
         });
     } else {
