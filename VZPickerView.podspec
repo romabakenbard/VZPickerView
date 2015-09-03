@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "VZPickerView"
-  s.version      = "0.0.2"
+  s.version      = "0.0.3"
   s.summary      = "Picker"
   s.description  = "Small library that can pick date, strings, views"
   s.homepage     = "https://github.com/alekoleg/VZPickerView"
