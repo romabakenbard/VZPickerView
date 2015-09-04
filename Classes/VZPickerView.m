@@ -236,25 +236,23 @@ static UIView *_ipadHolderView = nil;
 
 #pragma mark - UIPickerViewDelegate -
 
-- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component {
-    return _customObjects[row];
-}
-
 - (UIView *)pickerView:(UIPickerView *)pickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
-    id object = _customObjects[row];
-    if (![object isKindOfClass:[UIView class]]) {
-        object = nil;
-    } else {
-        UIView * myView = object;
-        // first convert to a UIImage
-        UIGraphicsBeginImageContextWithOptions(myView.bounds.size, NO, 0);
-        [myView.layer renderInContext:UIGraphicsGetCurrentContext()];
-        UIImage * image = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
-        // then convert back to a UIImageView and return it
-        object = [[UIImageView alloc] initWithImage:image];
+    
+    NSString *text = _customObjects[row];
+    
+    UILabel *label = (UILabel*)view;
+    if(view == nil) {
+        label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.contentView.frame.size.width-20.0, 30)];
+        label.backgroundColor = [UIColor clearColor];
+        label.text = text;
+        label.textAlignment = NSTextAlignmentCenter;
+        label.adjustsFontSizeToFitWidth = YES;
+        label.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
+        label.textColor = [UIColor blackColor];
+        label.font = [UIFont systemFontOfSize:22.0];
     }
-    return object;
+    
+    return label;
 }
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component {
@@ -267,19 +265,6 @@ static UIView *_ipadHolderView = nil;
 
 - (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component {
     return 50;
-}
-
-- (BOOL)respondsToSelector:(SEL)aSelector {
-    
-    if ([NSStringFromSelector(aSelector) isEqualToString:NSStringFromSelector(@selector(pickerView:viewForRow:forComponent:reusingView:))]) {
-        BOOL result = (_customObjects.count > 0);
-        if (result) {
-            id object = _customObjects[0];
-            result = ([object isKindOfClass:[UIView class]]);
-        }
-        return result;
-    }
-    return [super respondsToSelector:aSelector];
 }
 
 #pragma mark - Helper -
