@@ -168,7 +168,9 @@ static UIView *_ipadHolderView = nil;
     
     if (_customPicker) {
         if (_objectCompleteBlock) {
-            id object = _customObjects[[_customPicker selectedRowInComponent:0]];
+            NSInteger selectedRow = [_customPicker selectedRowInComponent:0];
+            [_customPicker selectRow:selectedRow inComponent:0 animated:NO];
+            id object = _customObjects[selectedRow];
             _objectCompleteBlock(object);
         }
     }
